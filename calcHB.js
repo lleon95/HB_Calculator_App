@@ -20,24 +20,33 @@ $(function(){
 	// Calcular H
 	$("#CalcH").click(function(){
 		var x = $("#Bvalue").val();
-		var xj = Data.B;
-		var yj = Data.H;
-		var k = xj.length - 2;
+		if(!Number.isNaN(Number(x)))
+		{
+			var xj = Data.B;
+			var yj = Data.H;
+			var k = xj.length - 2;
+			
+			y = interpolate(x, k, yj, xj).toFixed(3);
+			alert("El valor de H es: "+ y);
+		}
+		else alert("El valor insertado no es un número");
 		
-		y = interpolate(x, k, yj, xj).toFixed(3);
-		alert("El valor de H es: "+ y);
 		
 		
 	});
 	// Calcular H
 	$("#CalcB").click(function(){
 		var x = $("#Hvalue").val();
-		var xj = Data.H;
-		var yj = Data.B;
-		var k = xj.length - 2;
-		
-		y = interpolate(x, k, yj, xj).toFixed(3);
-		alert("El valor de B es: "+y);
+		if(!Number.isNaN(Number(x)))
+		{
+			var xj = Data.H;
+			var yj = Data.B;
+			var k = xj.length - 2;
+			
+			y = interpolate(x, k, yj, xj).toFixed(3);
+			alert("El valor de B es: "+y);
+		}
+		else alert("El valor insertado no es un número");
 	});
 
 
@@ -106,26 +115,88 @@ function nearValues(x, xi, k)
 	var farestMax = 0;
 	var indexes = [0,0,0,0];
 
+	/*
+		Nueva implementación
+		22 Ago 2016
+	*/
+
 	for(var i = 0; i<=k; i++)
 	{
-		// Min values
-		if(xi[i] > nearestMin && xi[i] < x)
+		// Si se intentan con valores inferiores a la cota
+		if(xi[0] > x)
 		{
-			// Hold the old nearest value
-			farestMin = nearestMin;
-			// New nearest value
-			nearestMin = xi[i];
-			// Update indexes
-			indexes[0] = indexes[1]; // Old
-			indexes[1] = i;
+			if(xi.length >= 4)
+			{
+				// Hay suficientes valores
+				indexes[0] = 0;
+				indexes[1] = 1;
+				indexes[2] = 2;
+				indexes[3] = 3;
+				alert("El valor que se brindará será extrapolado");
+				break;
+			}
 		}
-		// Max values
-		
-		if(xi[i] > x)
+		// Si solo hay un valor inferior a la cota
+		else if(xi[0] <= x && xi[1] >= x)
 		{
-			indexes[3] = indexes[1] + 2; 
-			indexes[2] = indexes[1] + 1;
+			if(xi.length >= 4)
+			{
+				// Hay suficientes valores
+				indexes[0] = 0;
+				indexes[1] = 1;
+				indexes[2] = 2;
+				indexes[3] = 3;
+				break;
+			}
 		}
+		// Si solo hay un valor superior a la cota
+		else if(xi[k] >= x && xi[k-1] <= x)
+		{
+			if(xi.length >= 4)
+			{
+				// Hay suficientes valores
+				indexes[0] = k-3;
+				indexes[1] = k-2;
+				indexes[2] = k-1;
+				indexes[3] = k;
+				break;
+			}
+		}
+		// Si no hay valores superiores a la cota
+		else if(xi[k] <= x)
+		{
+			if(xi.length >= 4)
+			{
+				// Hay suficientes valores
+				indexes[0] = k-3;
+				indexes[1] = k-2;
+				indexes[2] = k-1;
+				indexes[3] = k;
+				alert("El valor que se brindará será extrapolado");
+				break;
+			}
+		}
+		else
+		{
+			if(xi[i] > nearestMin && xi[i] < x)
+			{
+				// Hold the old nearest value
+				farestMin = nearestMin;
+				// New nearest value
+				nearestMin = xi[i];
+				// Update indexes
+				indexes[0] = indexes[1]; // Old
+				indexes[1] = i;
+			}
+			// Max values
+			
+			if(xi[i] > x)
+			{
+				indexes[3] = indexes[1] + 2; 
+				indexes[2] = indexes[1] + 1;
+			}
+		}
+
 
 	}
 	return indexes;
